@@ -12,11 +12,11 @@ class Book:
     """图书类，封装图书信息"""
     
     def __init__(self, isbn: str, title: str, author: str, quantity: int):
+        """分别保存图书编号，书名，作者，数量"""
         self.isbn = isbn
         self.title = title
         self.author = author
         self.quantity = quantity
-    
     def to_dict(self) -> Dict:
         """转换为字典，便于JSON序列化"""
         return {
@@ -27,7 +27,7 @@ class Book:
         }
     
     @classmethod
-    def from_dict(cls, data: Dict) -> 'Book':
+    def from_dict(cls, data: Dict) -> 'Book':  # cls = Book 这个类本身
         """从字典创建Book对象"""
         return cls(
             isbn=data['isbn'],
@@ -44,22 +44,25 @@ class BookManager:
     """图书管理器，处理所有图书操作"""
     
     def __init__(self, data_file: str = "books.json"):
-        self.data_file = data_file
-        self.books: List[Book] = []
-        self.load_books()
+        self.data_file = data_file # 数据文件路径
+        self.books: List[Book] = [] # 内存中的图书列表
+        self.load_books()  # 启动时自动加载数据
     
     def load_books(self) -> None:
         """从JSON文件加载图书信息"""
         try:
             if os.path.exists(self.data_file):
+                # 文件存在 → 读取 JSON → 转成 Book 对象列表
                 with open(self.data_file, 'r', encoding='utf-8') as f:
                     data = json.load(f)
                     self.books = [Book.from_dict(item) for item in data]
                 print(f"✓ 成功加载 {len(self.books)} 本图书信息")
             else:
+                # 文件不存在 → 从空列表开始
                 print("ℹ 数据文件不存在，将创建新文件")
                 self.books = []
         except json.JSONDecodeError:
+            # JSON 格式坏了 → 也不崩溃，从空开始
             print("✗ 数据文件格式错误，将使用空数据")
             self.books = []
         except Exception as e:
